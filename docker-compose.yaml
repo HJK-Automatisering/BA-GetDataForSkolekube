@@ -5,7 +5,7 @@ services:
     volumes:
       - filer-istskole360:/shr/ISTSkole360
     env_file:
-      - .env
+      - stack.env
     restart: on-failure
 volumes:
   filer-istskole360:
