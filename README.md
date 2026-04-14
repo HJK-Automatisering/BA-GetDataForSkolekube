@@ -58,6 +58,12 @@ python main.py
 
 Sæt `RUN_NOW=true` i `.env` for at eksekvere med det samme uden at afvente scheduleren.
 
+Deploy alle stored procedures til databasen:
+
+```bash
+python deploy_procedures.py
+```
+
 ## Docker
 
 Opret eksternt volume (kun første gang):
@@ -88,7 +94,7 @@ docker compose stop
 | Variabel | Beskrivelse | Eksempel |
 |---|---|---|
 | `DB_DRIVER` | ODBC-driver til SQL Server | `ODBC Driver 18 for SQL Server` |
-| `DB_SERVER` | Server og port | `0:0:0:0:0000` |
+| `DB_SERVER` | Server og port | `0.0.0.0:0000` |
 | `DB_NAME` | Databasenavn | `Skolekube` |
 | `DB_USERNAME` | Databasebruger | `etl_user` |
 | `DB_PASSWORD` | Adgangskode | — |
@@ -100,6 +106,37 @@ docker compose stop
 
 ```
 BA-GetDataForSkolekube/
+├── sql/
+│   ├── dw/
+│   │   ├── usp_cleanup.sql
+│   │   ├── usp_fill_absence_gaps.sql
+│   │   ├── usp_load_dim_citizenship.sql
+│   │   ├── usp_load_dim_country.sql
+│   │   ├── usp_load_dim_field_name.sql
+│   │   ├── usp_load_dim_language.sql
+│   │   ├── usp_load_dim_main_school.sql
+│   │   ├── usp_load_dim_municipality.sql
+│   │   ├── usp_load_dim_school.sql
+│   │   ├── usp_load_dim_school_type.sql
+│   │   ├── usp_load_dim_student.sql
+│   │   ├── usp_load_dim_student_sensitive.sql
+│   │   ├── usp_load_dim_student_type.sql
+│   │   ├── usp_load_fact_absence_daily.sql
+│   │   ├── usp_load_fact_absence_lesson.sql
+│   │   ├── usp_load_fact_enrollment.sql
+│   │   ├── usp_load_fact_grade.sql
+│   │   ├── usp_load_fact_student_action.sql
+│   │   ├── usp_load_fact_student_event.sql
+│   │   ├── usp_load_fact_student_field.sql
+│   │   ├── usp_load_fact_student_relocation.sql
+│   │   ├── usp_load_fact_student_snapshot.sql
+│   │   ├── usp_master.sql
+│   │   └── usp_refresh_dim_date_school_year_label.sql
+│   └── meta/
+│       ├── usp_meta_finish_run.sql
+│       ├── usp_meta_finish_step.sql
+│       ├── usp_meta_start_run.sql
+│       └── usp_meta_start_step.sql
 ├── utils/
 │   ├── get_engine.py       # SQLAlchemy engine-opsætning
 │   ├── load_stg.py         # Indlæsning af staging-tabeller
@@ -108,6 +145,7 @@ BA-GetDataForSkolekube/
 │   └── should_run.py       # Skoledagstjek mod dim_date
 ├── constants.py            # Kolonnemapping og filkonstanter
 ├── main.py                 # Entry point og scheduler
+├── deploy_procedures.py    # Deploy alle stored procedures
 ├── Dockerfile
 ├── docker-compose.yaml
 ├── requirements.txt
