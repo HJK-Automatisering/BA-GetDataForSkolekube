@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    container_name: ba-getdataforskolekube
+    volumes:
+      - filer-istskole360:/shr/ISTSkole360
+    env_file:
+      - .env
+    restart: on-failure
+volumes:
+  filer-istskole360:
+    external: true
