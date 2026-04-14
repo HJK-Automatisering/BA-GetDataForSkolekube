@@ -1,12 +1,15 @@
 services:
-  app:
-    build: .
+  ba-getdataforskolekube:
     container_name: ba-getdataforskolekube
+    # image: 'ghcr.io/hjk-automatisering/ba-getdataforskolekube:main' # Uncomment on portainer
+    build: . # Remove on portainer
     volumes:
       - filer-istskole360:/shr/ISTSkole360
     env_file:
-      - stack.env
+      - .env # stack.env on portainer
     restart: on-failure
+    environment:
+      - TZ=Europe/Copenhagen
 volumes:
   filer-istskole360:
     external: true
