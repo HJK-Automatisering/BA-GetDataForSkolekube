@@ -14,7 +14,7 @@ ETL-pipeline til daglig indlæsning af elevdata fra Tabulex til Skolekubes data 
 
 ## Beskrivelse
 
-Projektet henter daglige udtræk fra Tabulex (elever, fravær, historik og karakterer), indlæser dem i staging-tabeller og eksekverer en master stored procedure i SQL Server-datawarehouseét Skolekube.
+Projektet henter daglige udtræk fra Tabulex (elever, fravær, historik og karakterer), indlæser dem i staging-tabeller og eksekverer en master stored procedure i SQL Server-dabasen Skolekube.
 
 Pipelinen kører som en Docker-container og afvikles dagligt på et konfigureret tidspunkt via en indbygget scheduler.
 
