@@ -53,6 +53,7 @@ Thumbs.db
 # Environment variables / secrets
 .env
 *.env
+stack.env
 
 # Local data
 *.sqlite3
