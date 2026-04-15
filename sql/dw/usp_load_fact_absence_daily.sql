@@ -8,6 +8,8 @@
 -- absence_value is capped at 1.0. Priority: U > S > L > F.
 -- Rows no longer in stg are reset to IF within current school year.
 -- Future-dated registrations (> yesterday) are filtered out.
+-- Half day registrations (row_type 7) for grade 0-6 are treated as
+-- full day (absence_value=1.0, lesson='Hele dagen').
 -- =============================================================================
 
 CREATE OR ALTER PROCEDURE dw.usp_load_fact_absence_daily
@@ -80,9 +82,13 @@ BEGIN
                     WHEN MAX(CASE WHEN a.absence_reason = 'L' THEN 1 ELSE 0 END) = 1 THEN 'L'
                     ELSE 'F'
                 END                            AS absence_reason_code,
-                -- row_type 5 always wins — no cross-type summation
+                -- row_type 5 always wins — no cross-type summation.
+                -- row_type 7 on grade 0-6 is treated as full day (1.0).
+                -- NULL class_level keeps original half day logic.
                 CASE
                     WHEN MAX(CASE WHEN a.row_type = 5 THEN 1 ELSE 0 END) = 1
+                        THEN 1.0
+                    WHEN MAX(CASE WHEN a.row_type = 7 AND TRY_CAST(a.class_level AS INT) BETWEEN 0 AND 6 THEN 1 ELSE 0 END) = 1
                         THEN 1.0
                     WHEN SUM(CASE WHEN a.row_type = 7 THEN 0.5 ELSE 0.0 END) >= 1.0
                         THEN 1.0
@@ -90,6 +96,8 @@ BEGIN
                 END                            AS absence_value,
                 CASE
                     WHEN MAX(CASE WHEN a.row_type = 5 THEN 1 ELSE 0 END) = 1
+                        THEN 'Hele dagen'
+                    WHEN MAX(CASE WHEN a.row_type = 7 AND TRY_CAST(a.class_level AS INT) BETWEEN 0 AND 6 THEN 1 ELSE 0 END) = 1
                         THEN 'Hele dagen'
                     WHEN SUM(CASE WHEN a.row_type = 7 THEN 1 ELSE 0 END) >= 2
                         THEN 'Hele dagen'
