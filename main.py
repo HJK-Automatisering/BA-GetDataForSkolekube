@@ -21,7 +21,6 @@ from utils.get_engine import get_engine
 from utils.load_stg import load_all_stg_tables
 from utils.run_etl import run_etl
 from utils.setup_logging import setup_logging
-from utils.should_run import should_run
 
 load_dotenv()
 logger: logging.Logger = logging.getLogger(__name__)
@@ -36,10 +35,9 @@ def main() -> None:
 
     Flow:
         1. Establish database engine.
-        2. Check whether today is a school day — exit early if not.
-        3. Load all four source files into staging tables.
-        4. Log summary of rows inserted per table.
-        5. Execute master ETL stored procedure.
+        2. Load all four source files into staging tables.
+        3. Log summary of rows inserted per table.
+        4. Execute master ETL stored procedure.
 
     Args:
         None.
@@ -55,9 +53,6 @@ def main() -> None:
 
     logger.info('Starting staging load')
     engine: Engine = get_engine()
-    if not should_run(engine):
-        logger.info('Not a school day — exiting')
-        return
     results: dict[str, int] = load_all_stg_tables(engine)
     logger.info('Staging load complete')
     for table_name, rows in results.items():
