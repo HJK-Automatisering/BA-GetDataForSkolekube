@@ -141,8 +141,7 @@ BA-GetDataForSkolekube/
 │   ├── get_engine.py       # SQLAlchemy engine-opsætning
 │   ├── load_stg.py         # Indlæsning af staging-tabeller
 │   ├── run_etl.py          # Eksekvering af master stored procedure
-│   ├── setup_logging.py    # Logkonfiguration
-│   └── should_run.py       # Skoledagstjek mod dim_date
+│   └── setup_logging.py    # Logkonfiguration
 ├── constants.py            # Kolonnemapping og filkonstanter
 ├── main.py                 # Entry point og scheduler
 ├── deploy_procedures.py    # Deploy alle stored procedures
