@@ -22,6 +22,7 @@ BEGIN
         EXEC dw.usp_load_dim_municipality                      @run_id = @run_id;
         EXEC dw.usp_load_dim_school_type                       @run_id = @run_id;
         EXEC dw.usp_load_dim_main_school                       @run_id = @run_id;
+        EXEC dw.usp_load_dim_school_district                   @run_id = @run_id;
         EXEC dw.usp_load_dim_school                            @run_id = @run_id;
         EXEC dw.usp_load_dim_student_type                      @run_id = @run_id;
         EXEC dw.usp_load_dim_citizenship                       @run_id = @run_id;

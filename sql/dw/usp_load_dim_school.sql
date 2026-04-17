@@ -4,7 +4,8 @@
 -- Loads school dimension from stg.student_basis and stg.student_history.
 -- MERGE on school_code. Hardcodes main_school_code = school_code
 -- for schools 280628 (Hjørringskolen) and 821019 (Hjørring Ny 10.)
--- to prevent ETL overwrites.
+-- and 821006 (Tårs Skole) to prevent ETL overwrites.
+-- All other schools with unknown main_school_code resolve to -1.
 -- =============================================================================
 
 CREATE OR ALTER PROCEDURE dw.usp_load_dim_school
@@ -45,15 +46,20 @@ BEGIN
         src AS (
             SELECT school_code, school_name, school_owner_type, stc,
                    CASE
-                       WHEN school_code IN (280628, 821019) THEN school_code
-                       ELSE msc
+                       -- Hardcoded self-referencing main schools
+                       WHEN school_code IN (280628, 821019, 821006) THEN school_code
+                       -- Known main schools map to themselves
+                       WHEN msc IN (280093, 280094, 280096, 280626, 280627, 280628, 821019, 821006) THEN msc
+                       -- All others resolve to -1
+                       ELSE -1
                    END AS msc
             FROM bs
             UNION ALL
             SELECT school_code, school_name, school_owner_type, stc,
                    CASE
-                       WHEN school_code IN (280628, 821019) THEN school_code
-                       ELSE msc
+                       WHEN school_code IN (280628, 821019, 821006) THEN school_code
+                       WHEN msc IN (280093, 280094, 280096, 280626, 280627, 280628, 821019, 821006) THEN msc
+                       ELSE -1
                    END AS msc
             FROM ho
         )

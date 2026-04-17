@@ -4,7 +4,7 @@ __maintainer__   = 'Anders H. Vestergaard'
 __author__       = 'Anders H. Vestergaard'
 __contributors__ = []
 __email__        = 'anders.vestergaard@hjoerring.dk'
-__version__      = '1.0.0'
+__version__      = '1.0.2'
 __status__       = 'Production'
 
 #######################################################################
@@ -58,6 +58,7 @@ def main() -> None:
     for table_name, rows in results.items():
         logger.info('  %-30s %8d rows', table_name, rows)
     run_etl(engine)
+    logger.info('ETL complete — next run scheduled at %s', RUN_AT)
 
 if __name__ == '__main__':
     setup_logging()

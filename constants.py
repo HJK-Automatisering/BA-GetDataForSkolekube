@@ -25,7 +25,7 @@ STG_RENAME: dict[str, dict[str, str]] = {
         'komnavn': 'municipality_name',
         'betkomkode': 'paying_mun_code',
         'betkomnavn': 'paying_mun_name',
-        'skoledistrikt': 'school_district',
+        'skoledistrikt': 'school_district_code',
         'elevtrin': 'student_level',
         'klassetrin': 'class_level',
         'betegnelse': 'class_label',

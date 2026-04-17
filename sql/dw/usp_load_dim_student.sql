@@ -4,7 +4,10 @@
 -- Loads student dimension from stg.student_basis.
 -- Joins dim_student_sensitive on cpr_nr for surrogate key.
 -- Resolves student_type_code via LEFT JOIN on student_type_name.
+-- Resolves school_district_code via LEFT JOIN on dim_school_district.
+--   Known codes map directly; unknown codes resolve to -1.
 -- Populates previous_main_school_code for school 280628 transfers.
+--   If previous_main_school_code = -1, falls back to school_district_code.
 -- Deletes students no longer in source (excludes sentinel -1).
 -- =============================================================================
 
@@ -62,7 +65,7 @@ BEGIN
                 sb.class_level                                         AS grade_level,
                 sb.class_track,
                 sb.class_label,
-                sb.school_district,
+                COALESCE(dsd.school_district_code, -1)                 AS school_district_code,
                 sb.photo_permission,
                 sb.transport_permission,
                 CAST(ISNULL(sb.action_danish_second_lang, 0) AS BIT)  AS action_danish_second_lang,
@@ -78,10 +81,21 @@ BEGIN
                 COALESCE(sb.nationality_code,   -1)                    AS citizenship_code,
                 COALESCE(sb.birth_country_code, -1)                    AS country_code,
                 COALESCE(sb.mother_tongue_code, -1)                    AS language_code,
-                ps.previous_main_school_code
+                -- If previous_main_school_code is -1, fall back to school_district_code
+                CASE
+                    WHEN COALESCE(ps.previous_main_school_code, -1) <> -1
+                        THEN ps.previous_main_school_code
+                    ELSE COALESCE(dsd.school_district_code, -1)
+                END                                                    AS previous_main_school_code
             FROM stg.student_basis sb
-            JOIN  dw.dim_student_sensitive s  ON s.cpr_nr              = sb.cpr_nr
+            JOIN  dw.dim_student_sensitive s   ON s.cpr_nr              = sb.cpr_nr
             LEFT JOIN dw.dim_student_type  dst ON dst.student_type_name = sb.student_type_name
+            LEFT JOIN dw.dim_school_district dsd ON dsd.school_district_code =
+                CASE
+                    WHEN sb.school_district_code IN (1, 11, 18, 20, 22, 23)
+                        THEN sb.school_district_code
+                    ELSE -1
+                END
             LEFT JOIN #prev_school         ps  ON ps.student_id         = s.student_id
         ) AS src ON t.student_id = src.student_id
         WHEN MATCHED THEN UPDATE SET
@@ -90,7 +104,7 @@ BEGIN
             t.grade_level               = src.grade_level,
             t.class_track               = src.class_track,
             t.class_label               = src.class_label,
-            t.school_district           = src.school_district,
+            t.school_district_code      = src.school_district_code,
             t.photo_permission          = src.photo_permission,
             t.transport_permission      = src.transport_permission,
             t.action_danish_second_lang = src.action_danish_second_lang,
@@ -109,7 +123,7 @@ BEGIN
             t.previous_main_school_code = src.previous_main_school_code
         WHEN NOT MATCHED BY TARGET THEN INSERT (
             student_id, age,
-            student_level, grade_level, class_track, class_label, school_district,
+            student_level, grade_level, class_track, class_label, school_district_code,
             photo_permission, transport_permission,
             action_danish_second_lang, action_reception_class, action_special_education,
             action_supp_danish, action_junior_master, action_intermediate,
@@ -118,7 +132,7 @@ BEGIN
             previous_main_school_code
         ) VALUES (
             src.student_id, src.age,
-            src.student_level, src.grade_level, src.class_track, src.class_label, src.school_district,
+            src.student_level, src.grade_level, src.class_track, src.class_label, src.school_district_code,
             src.photo_permission, src.transport_permission,
             src.action_danish_second_lang, src.action_reception_class, src.action_special_education,
             src.action_supp_danish, src.action_junior_master, src.action_intermediate,

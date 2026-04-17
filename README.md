@@ -117,6 +117,7 @@ BA-GetDataForSkolekube/
 │   │   ├── usp_load_dim_main_school.sql
 │   │   ├── usp_load_dim_municipality.sql
 │   │   ├── usp_load_dim_school.sql
+│   │   ├── usp_load_dim_school_district
 │   │   ├── usp_load_dim_school_type.sql
 │   │   ├── usp_load_dim_student.sql
 │   │   ├── usp_load_dim_student_sensitive.sql
