@@ -3,6 +3,7 @@
 -- =============================================================================
 -- Loads student action/tiltag fact from stg.student_history (row_type 5).
 -- MERGE on (student_id, action_type_code, from_date_id).
+-- Source duplicates are collapsed via DISTINCT before MERGE.
 -- =============================================================================
 
 CREATE OR ALTER PROCEDURE dw.usp_load_fact_student_action
@@ -23,7 +24,8 @@ BEGIN
         DECLARE @o TABLE (a NVARCHAR(10));
         MERGE dw.fact_student_action AS t
         USING (
-            SELECT s.student_id,
+            SELECT DISTINCT
+                s.student_id,
                 COALESCE(dat.action_type_code,     -1) AS atc,
                 COALESCE(drr.referral_reason_code, -1) AS rrc,
                 CAST(h.valid_from AS INT)              AS fd,
