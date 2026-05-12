@@ -4,7 +4,7 @@ __maintainer__   = 'Anders H. Vestergaard'
 __author__       = 'Anders H. Vestergaard'
 __contributors__ = []
 __email__        = 'anders.vestergaard@hjoerring.dk'
-__version__      = '1.0.2'
+__version__      = '1.0.3'
 __status__       = 'Production'
 
 #######################################################################
