@@ -94,7 +94,8 @@ STG_RENAME: dict[str, dict[str, str]] = {
         'Feltnavn': 'field_name',
         'Feltvaerdi': 'field_value',
         'Tilflyttetkommunekode': 'moved_to_mun_code',
-        'TilflyttetDato': 'moved_date'},
+        'TilflyttetDato': 'moved_date',
+        '_extra_3': 'school_code'},
     'stg.student_absence': {
         'row_type': 'row_type',
         'cprnr': 'cpr_nr',

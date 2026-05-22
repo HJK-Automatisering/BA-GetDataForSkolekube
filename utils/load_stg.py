@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
-from constants import STG_DROP_COLS, STG_FILES, MULTITYPE_FILES, STG_RENAME
+from constants import MULTITYPE_FILES, STG_DROP_COLS, STG_FILES, STG_RENAME
 
 load_dotenv()
 
@@ -57,8 +57,10 @@ def _parse_multitype_file(path: Path) -> pd.DataFrame:
         2. Skip line 1 (metadata) and line type 3 (sum lines).
         3. For each section: read header line (linjetype 2), collect data
            lines until next header or end of file.
-        4. Parse each section into a DataFrame with row_type prepended.
-        5. Concatenate all sections into one wide DataFrame.
+        4. Strip empty trailing columns from header.
+        5. Extend header with _extra_N names if data has more columns.
+        6. Parse each section into a DataFrame with row_type prepended.
+        7. Concatenate all sections into one wide DataFrame.
 
     Args:
         path (Path): Full path to the source file.
@@ -93,7 +95,27 @@ def _parse_multitype_file(path: Path) -> pd.DataFrame:
         raise ValueError(f'No valid sections found in file: {path}')
     dfs: list[pd.DataFrame] = []
     for header, rows in sections:
-        df: pd.DataFrame = pd.DataFrame(rows, columns=['row_type'] + header)
+        # Strip empty trailing header columns
+        cleaned_header: list[str] = []
+        for col in reversed(header):
+            if col.strip() or cleaned_header:
+                cleaned_header.insert(0, col)
+        # Find max meaningful data width (strip trailing empty values)
+        max_data_width: int = 0
+        for row in rows:
+            for j in range(len(row) - 1, -1, -1):
+                if row[j].strip():
+                    max_data_width = max(max_data_width, j + 1)
+                    break
+        # Extend header with _extra_N if data has more columns than header
+        # +1 accounts for row_type which is prepended to header
+        while len(cleaned_header) + 1 < max_data_width:
+            cleaned_header.append(f'_extra_{len(cleaned_header)}')
+        col_count: int = len(cleaned_header) + 1
+        padded_rows: list[list[str | None]] = [
+            row[:col_count] + [None] * max(0, col_count - len(row))
+            for row in rows]
+        df: pd.DataFrame = pd.DataFrame(padded_rows, columns=['row_type'] + cleaned_header)
         df = df.replace('', None)
         dfs.append(df)
     return pd.concat(dfs, ignore_index=True)
