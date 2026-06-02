@@ -1,4 +1,4 @@
-# BA-GetDataForSkolekube
+# BA-Skolekube
 
 ETL-pipeline til daglig indlæsning af elevdata fra Tabulex til Skolekubes data warehouse.
 
@@ -30,8 +30,8 @@ Pipelinen kører som en Docker-container og afvikles dagligt på et konfigureret
 Klon repositoriet:
 
 ```bash
-git clone https://github.com/dit-repo/BA-GetDataForSkolekube.git
-cd BA-GetDataForSkolekube
+git clone https://github.com/dit-repo/ba-skolekube.git
+cd ba-skolekube
 ```
 
 Opret virtuelt miljø og installér afhængigheder:
@@ -105,7 +105,7 @@ docker compose stop
 ## Projektstruktur
 
 ```
-BA-GetDataForSkolekube/
+BA-Skolekube/
 ├── sql/
 │   ├── dw/
 │   │   ├── usp_cleanup.sql

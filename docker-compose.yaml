@@ -1,7 +1,7 @@
 services:
-  ba-getdataforskolekube:
-    container_name: ba-getdataforskolekube
-    # image: 'ghcr.io/hjk-automatisering/ba-getdataforskolekube:main' # Uncomment on portainer
+  ba-skolekube:
+    container_name: ba-skolekube
+    # image: 'ghcr.io/hjk-automatisering/ba-skolekube:main' # Uncomment on portainer
     build: . # Remove on portainer
     volumes:
       - filer-istskole360:/shr/ISTSkole360
