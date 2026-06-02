@@ -129,10 +129,11 @@ def _load_file_to_stg(filename: str, table_name: str, engine: Engine, load_date:
         1. Resolve file path from FILE_PATH environment variable.
         2. Parse file — multi-section or plain CSV depending on file type.
         3. Rename columns to stg target names and drop unmapped columns.
-        4. Drop columns not present in the stg table definition.
-        5. Apply table-specific row filters.
-        6. Add stg_load_date column.
-        7. Truncate existing rows and bulk-insert via SQLAlchemy.
+        4. Drop duplicate column names — keeps first occurrence.
+        5. Drop columns not present in the stg table definition.
+        6. Apply table-specific row filters.
+        7. Add stg_load_date column.
+        8. Truncate existing rows and bulk-insert via SQLAlchemy.
 
     Args:
         filename (str): Source filename, e.g. 'elev_basis.csv'.
@@ -165,6 +166,7 @@ def _load_file_to_stg(filename: str, table_name: str, engine: Engine, load_date:
             keep_default_na=False,
             na_values=[''])
     df = df.rename(columns=rename_map)
+    df = df.loc[:, ~df.columns.duplicated(keep='first')]
     df = df[[col for col in rename_map.values() if col in df.columns]]
     df = df.drop(columns=[col for col in drop_cols if col in df.columns])
     if table_name == 'stg.student_basis' and 'school_type_code' in df.columns:
