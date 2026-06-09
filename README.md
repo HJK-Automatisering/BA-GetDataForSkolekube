@@ -1,4 +1,4 @@
-# BA-Skolekube
+# ba-skolekube
 
 ETL-pipeline til daglig indlæsning af elevdata fra Tabulex til Skolekubes data warehouse.
 

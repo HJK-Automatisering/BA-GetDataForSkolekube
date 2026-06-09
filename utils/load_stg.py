@@ -167,7 +167,7 @@ def _load_file_to_stg(filename: str, table_name: str, engine: Engine, load_date:
             na_values=[''])
     df = df.rename(columns=rename_map)
     df = df.loc[:, ~df.columns.duplicated(keep='first')]
-    df = df[[col for col in rename_map.values() if col in df.columns]]
+    df = df[[col for col in dict.fromkeys(rename_map.values()) if col in df.columns]]
     df = df.drop(columns=[col for col in drop_cols if col in df.columns])
     if table_name == 'stg.student_basis' and 'school_type_code' in df.columns:
         df = df[df['school_type_code'].notna()]
