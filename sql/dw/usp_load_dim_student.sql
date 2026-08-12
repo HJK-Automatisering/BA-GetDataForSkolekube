@@ -34,23 +34,23 @@ BEGIN
         );
 
         INSERT INTO #prev_school (student_id, previous_main_school_code)
-        SELECT e.student_id, dsc.main_school_code
+        SELECT DISTINCT e.student_id, dsc.main_school_code
         FROM dw.fact_enrollment e
         JOIN dw.dim_school dsc ON dsc.school_code = e.school_code
         WHERE e.school_code <> 280628
-          AND e.to_date_id IS NOT NULL
-          AND e.student_id IN (
-              SELECT ds.student_id
-              FROM dw.dim_student ds
-              WHERE ds.school_code = 280628
-          )
-          AND e.to_date_id = (
-              SELECT MAX(e2.to_date_id)
-              FROM dw.fact_enrollment e2
-              WHERE e2.student_id  = e.student_id
+        AND e.to_date_id IS NOT NULL
+        AND e.student_id IN (
+            SELECT ds.student_id
+            FROM dw.dim_student ds
+            WHERE ds.school_code = 280628
+        )
+        AND e.to_date_id = (
+            SELECT MAX(e2.to_date_id)
+            FROM dw.fact_enrollment e2
+            WHERE e2.student_id  = e.student_id
                 AND e2.school_code <> 280628
                 AND e2.to_date_id  IS NOT NULL
-          );
+        );
 
         DECLARE @o TABLE (a NVARCHAR(10));
         MERGE dw.dim_student AS t
