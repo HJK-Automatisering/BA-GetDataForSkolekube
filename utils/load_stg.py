@@ -51,6 +51,7 @@ def _parse_multitype_file(path: Path) -> pd.DataFrame:
     '''
     Description:
         Parses a multi-section Tabulex file into a single wide DataFrame.
+        Returns an empty DataFrame if the file contains no valid sections.
 
     Flow:
         1. Read all lines and decode as windows-1252.
@@ -61,15 +62,17 @@ def _parse_multitype_file(path: Path) -> pd.DataFrame:
         5. Extend header with _extra_N names if data has more columns.
         6. Parse each section into a DataFrame with row_type prepended.
         7. Concatenate all sections into one wide DataFrame.
+        8. Return empty DataFrame if no valid sections found.
 
     Args:
         path (Path): Full path to the source file.
 
     Returns:
-        pd.DataFrame: Combined DataFrame with all rows and a row_type column.
+        pd.DataFrame: Combined DataFrame with all rows and a row_type column,
+            or an empty DataFrame if the file contains no valid sections.
 
     Raises:
-        ValueError: If the file contains no valid sections.
+        None.
     '''
 
     lines: list[str] = path.read_text(encoding='windows-1252').splitlines()
@@ -92,7 +95,8 @@ def _parse_multitype_file(path: Path) -> pd.DataFrame:
     if current_header is not None and current_rows:
         sections.append((current_header, current_rows))
     if not sections:
-        raise ValueError(f'No valid sections found in file: {path}')
+        logger.warning('No valid sections found in file: %s — returning empty DataFrame', path)
+        return pd.DataFrame()
     dfs: list[pd.DataFrame] = []
     for header, rows in sections:
         # Strip empty trailing header columns
@@ -128,12 +132,13 @@ def _load_file_to_stg(filename: str, table_name: str, engine: Engine, load_date:
     Flow:
         1. Resolve file path from FILE_PATH environment variable.
         2. Parse file — multi-section or plain CSV depending on file type.
-        3. Rename columns to stg target names and drop unmapped columns.
-        4. Drop duplicate column names — keeps first occurrence.
-        5. Drop columns not present in the stg table definition.
-        6. Apply table-specific row filters.
-        7. Add stg_load_date column.
-        8. Truncate existing rows and bulk-insert via SQLAlchemy.
+        3. Return 0 immediately if parsed DataFrame is empty.
+        4. Rename columns to stg target names and drop unmapped columns.
+        5. Drop duplicate column names — keeps first occurrence.
+        6. Drop columns not present in the stg table definition.
+        7. Apply table-specific row filters.
+        8. Add stg_load_date column.
+        9. Truncate existing rows and bulk-insert via SQLAlchemy.
 
     Args:
         filename (str): Source filename, e.g. 'elev_basis.csv'.
@@ -165,6 +170,9 @@ def _load_file_to_stg(filename: str, table_name: str, engine: Engine, load_date:
             dtype=str,
             keep_default_na=False,
             na_values=[''])
+    if df.empty:
+        logger.warning('No data in %s — skipping insert', filename)
+        return 0
     df = df.rename(columns=rename_map)
     df = df.loc[:, ~df.columns.duplicated(keep='first')]
     df = df[[col for col in dict.fromkeys(rename_map.values()) if col in df.columns]]
